@@ -7,5 +7,6 @@ import (
 
 func Conf(router *gin.Engine) *gin.Engine {
 	router.GET("/", controllers.Ping)
+	router.GET("/mail", controllers.SendEmail)
 	return router
 }
