@@ -1,33 +1,35 @@
-package Mail
+package mail
 
 import (
-	"fmt"
-	"log"
+	"gopkg.in/gomail.v2"
 	"os"
-
-	"github.com/sendgrid/sendgrid-go"
-	"github.com/sendgrid/sendgrid-go/helpers/mail"
 )
 
+var list []struct {
+	Address string `json:"address,omitempty"`
+	Name    string `json:"name,omitempty"`
+}
+
 func Send() error {
-	from := mail.NewEmail("Lucas Lealsistemas", "lucasalves@lealsistemas.com")
-	subject := "Sending with SendGrid is Fun"
-	to := mail.NewEmail("Wendel", "wendel.amaral79@gmail.com")
-	plainTextContent := "and easy to do anywhere, even with Go"
-	htmlContent := "<strong>and easy to do anywhere, even with Go</strong>"
-	message := mail.NewSingleEmail(from, subject, to, plainTextContent, htmlContent)
-	client := sendgrid.NewSendClient(os.Getenv("SENDGRID_API_KEY"))
 
-	response, err := client.Send(message)
+	emailSender := os.Getenv("EMAIL_SENDER")
+	passSender := os.Getenv("PASS_SENDER")
+	host := os.Getenv("STMP_HOST")
 
-	if err != nil {
-		log.Println(err)
+	m := gomail.NewMessage()
+	m.SetHeader("From", emailSender)
+	m.SetHeader("To", "as.lucasalves@gmail.com")
+
+	m.SetHeader("Subject", "Hello GO!")
+	m.SetBody("text/html", "Hello <b>Bob</b> and <i>Cora</i>!")
+
+	d := gomail.NewDialer(host, 587, emailSender, passSender)
+
+	// Send the email to Bob, Cora and Dan.
+	if err := d.DialAndSend(m); err != nil {
+		println(err.Error())
 		return err
-
-	} else {
-		fmt.Println(response.StatusCode)
-		fmt.Println(response.Body)
-		fmt.Println(response.Headers)
-		return nil
 	}
+
+	return nil
 }
